@@ -12,3 +12,5 @@ openai
 fastapi
 uvicorn[standard]
 python-dotenv
+markdown
+pypandoc
