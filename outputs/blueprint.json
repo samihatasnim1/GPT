@@ -1,0 +1,32 @@
+{
+  "subtopics": [
+    "Intro",
+    "Core concept",
+    "Example",
+    "Exercises"
+  ],
+  "objectives": [
+    "Explain the main idea",
+    "Apply it in an example"
+  ],
+  "prereq_map": {
+    "Intro": [
+      "basic math"
+    ],
+    "Core concept": [
+      "Intro"
+    ]
+  },
+  "objective_map": {
+    "Explain the main idea": {
+      "subtopic": "Intro",
+      "difficulty": "intro",
+      "assessment_type": "exercise"
+    },
+    "Apply it in an example": {
+      "subtopic": "Example",
+      "difficulty": "intermediate",
+      "assessment_type": "exercise"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "notes": [
+    {
+      "title": "Intro",
+      "content": "This section introduces the topic."
+    }
+  ],
+  "worked_examples": [
+    {
+      "title": "Example 1",
+      "steps": "Step 1... Step 2..."
+    }
+  ],
+  "exercises": [
+    {
+      "title": "Exercise 1",
+      "prompt": "Answer a question.",
+      "difficulty": "intro"
+    }
+  ],
+  "metadata": {
+    "style": "simple academic tone"
+  }
+}

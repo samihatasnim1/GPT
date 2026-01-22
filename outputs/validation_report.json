@@ -1,0 +1,14 @@
+{
+  "passed": false,
+  "issues": [
+    "Objective not clearly covered in notes: Explain the main idea",
+    "Objective not assessed in exercises: Explain the main idea",
+    "Objective not clearly covered in notes: Apply it in an example",
+    "Objective not assessed in exercises: Apply it in an example"
+  ],
+  "fixes_applied": [
+    "(iter 1) Minor clarity edits",
+    "(iter 2) Minor clarity edits"
+  ],
+  "iterations": 2
+}

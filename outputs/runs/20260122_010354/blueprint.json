@@ -1,0 +1,39 @@
+{
+  "subtopics": [
+    "Introduction to Robot Motion Planning",
+    "Motion Planning Algorithms",
+    "Robot Control Principles",
+    "Application in Construction Robotics",
+    "Examples and Exercises"
+  ],
+  "learning_objectives": [
+    "Define key concepts of robot motion planning and control",
+    "Describe common motion planning algorithms and their applications",
+    "Explain basic robot control principles relevant to construction robotics",
+    "Apply motion planning and control concepts to construction robotics scenarios",
+    "Solve simple exercises involving robot motion planning and control"
+  ],
+  "prerequisite_map": {
+    "Introduction to Robot Motion Planning": [],
+    "Motion Planning Algorithms": [
+      "Introduction to Robot Motion Planning"
+    ],
+    "Robot Control Principles": [
+      "Introduction to Robot Motion Planning"
+    ],
+    "Application in Construction Robotics": [
+      "Motion Planning Algorithms",
+      "Robot Control Principles"
+    ],
+    "Examples and Exercises": [
+      "Application in Construction Robotics"
+    ]
+  },
+  "difficulty_map": {
+    "Introduction to Robot Motion Planning": "intro",
+    "Motion Planning Algorithms": "intermediate",
+    "Robot Control Principles": "intermediate",
+    "Application in Construction Robotics": "intermediate",
+    "Examples and Exercises": "intro"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "notes": [
+    {
+      "title": "Intro",
+      "content": "Revised intro section."
+    }
+  ],
+  "worked_examples": [
+    {
+      "title": "Example 1",
+      "steps": "Revised steps..."
+    }
+  ],
+  "exercises": [
+    {
+      "title": "Exercise 1",
+      "prompt": "Revised question.",
+      "difficulty": "intro"
+    }
+  ],
+  "metadata": {
+    "style": "simple academic tone"
+  }
+}

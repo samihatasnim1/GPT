@@ -1,0 +1,54 @@
+{
+  "subtopics": [
+    "Introduction to Robot Motion Planning in Construction Robotics",
+    "Kinematic and Dynamic Models of Construction Robots",
+    "Path Planning Algorithms: Graph-based and Sampling-based Methods",
+    "Motion Control Techniques for Construction Robots",
+    "Integration of Planning and Control in Construction Tasks",
+    "Case Studies and Practical Examples",
+    "Exercises and Problem Solving"
+  ],
+  "learning_objectives": [
+    "Explain the importance of motion planning and control in construction robotics",
+    "Model the kinematics and dynamics of typical construction robots",
+    "Implement basic graph-based and sampling-based path planning algorithms",
+    "Apply motion control techniques to follow planned trajectories",
+    "Integrate planning and control methods for practical construction tasks",
+    "Analyze case studies demonstrating motion planning and control in construction robotics",
+    "Solve exercises involving motion planning and control scenarios"
+  ],
+  "prerequisite_map": {
+    "Introduction to Robot Motion Planning in Construction Robotics": [],
+    "Kinematic and Dynamic Models of Construction Robots": [
+      "Linear algebra",
+      "Basic probability"
+    ],
+    "Path Planning Algorithms: Graph-based and Sampling-based Methods": [
+      "Kinematic and Dynamic Models of Construction Robots",
+      "Python/MATLAB"
+    ],
+    "Motion Control Techniques for Construction Robots": [
+      "Kinematic and Dynamic Models of Construction Robots",
+      "Python/MATLAB"
+    ],
+    "Integration of Planning and Control in Construction Tasks": [
+      "Path Planning Algorithms: Graph-based and Sampling-based Methods",
+      "Motion Control Techniques for Construction Robots"
+    ],
+    "Case Studies and Practical Examples": [
+      "Integration of Planning and Control in Construction Tasks"
+    ],
+    "Exercises and Problem Solving": [
+      "Case Studies and Practical Examples"
+    ]
+  },
+  "difficulty_map": {
+    "Introduction to Robot Motion Planning in Construction Robotics": "intro",
+    "Kinematic and Dynamic Models of Construction Robots": "intermediate",
+    "Path Planning Algorithms: Graph-based and Sampling-based Methods": "intermediate",
+    "Motion Control Techniques for Construction Robots": "intermediate",
+    "Integration of Planning and Control in Construction Tasks": "advanced",
+    "Case Studies and Practical Examples": "intermediate",
+    "Exercises and Problem Solving": "advanced"
+  }
+}

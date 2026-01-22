@@ -1,0 +1,1082 @@
+<!-- Save as: web/index.html
+     Run with backend:
+       python -m uvicorn server:app --reload --port 8000
+     Open:
+       http://localhost:8000
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Course Material Generation Framework</title>
+
+  <style>
+    :root{
+      --bg:#eef2f7;
+      --nav:#1f3e66;
+      --nav2:#244a7a;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --text:#0f172a;
+      --line:#e5e7eb;
+      --accent:#f59e0b;   /* orange */
+      --teal:#14b8a6;     /* teal */
+      --shadow: 0 12px 30px rgba(16,24,40,.10);
+      --radius: 14px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--font);
+      color:var(--text);
+      background: radial-gradient(1200px 500px at 10% -10%, rgba(36,74,122,.25), transparent 60%),
+                  radial-gradient(900px 500px at 90% -10%, rgba(20,184,166,.20), transparent 55%),
+                  var(--bg);
+    }
+
+    .app{
+      display:grid;
+      grid-template-columns: 260px 1fr;
+      min-height:100vh;
+    }
+
+    /* Sidebar */
+    .sidebar{
+      background: linear-gradient(180deg, var(--nav), var(--nav2));
+      color:#fff;
+      padding:18px 14px;
+      position:sticky;
+      top:0;
+      height:100vh;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 10px 14px;
+      border-bottom:1px solid rgba(255,255,255,.12);
+      margin-bottom:14px;
+    }
+    .logo{
+      width:36px;height:36px;border-radius:12px;
+      background: conic-gradient(from 220deg, var(--teal), rgba(255,255,255,.9), var(--accent), var(--teal));
+      box-shadow:0 10px 20px rgba(0,0,0,.15);
+    }
+    .brand h1{
+      margin:0;
+      font-size:14px;
+      line-height:1.2;
+      font-weight:700;
+    }
+    .brand p{
+      margin:0;
+      font-size:12px;
+      opacity:.85;
+    }
+
+    .nav{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      padding:10px 6px;
+    }
+
+    .nav button{
+      border:0;
+      background:rgba(255,255,255,.08);
+      color:#fff;
+      padding:12px 12px;
+      border-radius:12px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      cursor:pointer;
+      transition:.15s ease;
+      font-weight:600;
+      text-align:left;
+    }
+    .nav button:hover{ background:rgba(255,255,255,.13) }
+    .nav button.active{
+      background:rgba(255,255,255,.18);
+      outline:1px solid rgba(255,255,255,.16);
+    }
+    .pill{
+      font-size:11px;
+      padding:3px 8px;
+      border-radius:999px;
+      background:rgba(255,255,255,.14);
+      opacity:.95;
+    }
+
+    .mini{
+      margin-top:auto;
+      padding:10px;
+      border-top:1px solid rgba(255,255,255,.12);
+      opacity:.9;
+      font-size:12px;
+      line-height:1.35;
+    }
+
+    /* Main area */
+    .main{
+      padding:22px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
+    }
+    .titleblock h2{
+      margin:0;
+      font-size:18px;
+      font-weight:800;
+    }
+    .titleblock p{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .progresswrap{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      background:rgba(255,255,255,.65);
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:10px 12px;
+      box-shadow:0 8px 20px rgba(16,24,40,.06);
+      min-width:280px;
+      justify-content:space-between;
+    }
+    .dots{ display:flex; gap:6px; margin-right:6px; }
+    .dot{ width:10px;height:10px;border-radius:50%; background:rgba(15,23,42,.25); }
+    .dot:nth-child(1){ background:var(--accent) }
+    .dot:nth-child(2){ background:var(--teal) }
+    .bar{
+      flex:1;
+      height:8px;
+      background:#e8eef7;
+      border-radius:999px;
+      overflow:hidden;
+      margin:0 10px;
+    }
+    .bar > span{
+      display:block;
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, var(--teal), var(--accent));
+    }
+    .pct{
+      font-weight:800;
+      font-size:12px;
+      color:rgba(15,23,42,.75);
+      white-space:nowrap;
+    }
+
+    /* Cards + layouts */
+    .grid3{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap:14px;
+    }
+    .grid2{
+      display:grid;
+      grid-template-columns: 450px 1fr;
+      gap:14px;
+    }
+    .card{
+      background:rgba(255,255,255,.85);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .card .head{
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      background:linear-gradient(180deg, rgba(31,62,102,.08), transparent);
+    }
+    .card .head h3{
+      margin:0;
+      font-size:14px;
+      font-weight:800;
+    }
+    .card .body{
+      padding:14px 16px 16px;
+    }
+
+    /* Dashboard module cards */
+    .module{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-height:230px;
+    }
+    .modicon{
+      width:58px;height:58px;border-radius:16px;
+      display:grid;place-items:center;
+      background:rgba(20,184,166,.12);
+      border:1px solid rgba(20,184,166,.25);
+    }
+    .modicon svg{ width:34px;height:34px }
+    .module h4{ margin:0; font-size:14px; font-weight:900; }
+    .module p{ margin:0; color:var(--muted); font-size:13px; line-height:1.45; }
+    .status{ margin-top:auto; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+
+    .tag{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-weight:700;
+      white-space:nowrap;
+    }
+    .tag.orange{ border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.12); color:#8a5a00;}
+    .tag.gray{ background: rgba(15,23,42,.06); color: rgba(15,23,42,.8);}
+    .tag.blue{ background: rgba(31,62,102,.10); color: rgba(31,62,102,.95); border-color: rgba(31,62,102,.2);}
+
+    .btn{
+      border:0;
+      cursor:pointer;
+      border-radius:12px;
+      padding:10px 12px;
+      font-weight:800;
+      background:linear-gradient(90deg, var(--teal), var(--accent));
+      color:#0b1220;
+      box-shadow:0 10px 18px rgba(20,184,166,.12);
+    }
+    .btn.secondary{
+      background:rgba(15,23,42,.08);
+      color:rgba(15,23,42,.9);
+      box-shadow:none;
+    }
+    .btn:disabled{ opacity:.6; cursor:not-allowed; }
+
+    /* Forms */
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-bottom:12px;
+    }
+    label{
+      font-size:12px;
+      font-weight:800;
+      color:rgba(15,23,42,.78);
+    }
+    input, textarea{
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px 12px;
+      font:inherit;
+      background:rgba(255,255,255,.9);
+      outline:none;
+    }
+    textarea{ min-height:110px; resize:vertical }
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+
+    /* Content blocks */
+    .contentblock{
+      border:1px dashed rgba(15,23,42,.18);
+      border-radius:12px;
+      padding:12px;
+      background:rgba(255,255,255,.75);
+      margin-bottom:10px;
+    }
+    .highlight{
+      border-left:4px solid var(--accent);
+      padding-left:10px;
+      background:rgba(245,158,11,.10);
+    }
+
+    /* Tabs */
+    .tabs{
+      display:flex;
+      gap:8px;
+      padding:10px 10px 0;
+      border-bottom:1px solid var(--line);
+      background:rgba(255,255,255,.6);
+    }
+    .tab{
+      border:0;
+      background:transparent;
+      padding:10px 12px;
+      font-weight:900;
+      color:rgba(15,23,42,.55);
+      cursor:pointer;
+      border-bottom:3px solid transparent;
+    }
+    .tab.active{
+      color:rgba(15,23,42,.92);
+      border-bottom-color: var(--teal);
+    }
+
+    /* JSON viewer */
+    pre.json{
+      margin:0;
+      padding:12px;
+      border-radius:12px;
+      background:rgba(15,23,42,.92);
+      color:#e5e7eb;
+      overflow:auto;
+      max-height:320px;
+      font-size:12px;
+      line-height:1.45;
+      border:1px solid rgba(255,255,255,.10);
+    }
+
+    .smallmuted{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:6px;
+      line-height:1.35;
+    }
+
+    /* Page switching */
+    .page{ display:none; }
+    .page.active{ display:block; }
+
+    @media (max-width: 1100px){
+      .grid3{ grid-template-columns: 1fr; }
+      .grid2{ grid-template-columns: 1fr; }
+      .app{ grid-template-columns: 1fr; }
+      .sidebar{ position:relative; height:auto; }
+      .progresswrap{ min-width:0; width:100%; }
+    }
+    .badge2{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+  border:1px solid var(--line);
+  background:rgba(15,23,42,.06);
+  color:rgba(15,23,42,.85);
+}
+.badge2.intro{ background: rgba(245,158,11,.14); border-color: rgba(245,158,11,.30); color:#8a5a00; }
+.badge2.intermediate{ background: rgba(20,184,166,.12); border-color: rgba(20,184,166,.30); color:#0f766e; }
+.badge2.advanced{ background: rgba(31,62,102,.12); border-color: rgba(31,62,102,.25); color:#1f3e66; }
+
+.itemcard{
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:rgba(255,255,255,.82);
+  padding:12px;
+  margin-bottom:10px;
+}
+.itemcard h4{
+  margin:0 0 8px;
+  font-size:14px;
+  font-weight:900;
+}
+.meta{
+  margin-top:8px;
+  color:rgba(15,23,42,.70);
+  font-size:12px;
+}
+
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>AI Course Framework</h1>
+          <p>Construction Robotics</p>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Primary">
+        <button class="navbtn active" data-page="dashboard">Dashboard <span class="pill">Home</span></button>
+        <button class="navbtn" data-page="module1">Module 1 <span class="pill">Define</span></button>
+        <button class="navbtn" data-page="module2">Module 2 <span class="pill">Generate</span></button>
+        <button class="navbtn" data-page="module3">Module 3 <span class="pill">Review</span></button>
+      </nav>
+
+      <div class="mini">
+        <strong>Backend:</strong> This UI calls your Python API.<br/>
+        <span class="smallmuted" style="color:rgba(255,255,255,.85)">
+          Start server: <code>uvicorn server:app --reload --port 8000</code>
+        </span>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <div class="topbar">
+        <div class="titleblock">
+          <h2>AI-Based Course Material Generation Framework</h2>
+          <p>3-module workflow: Define → Generate → Review & Refine</p>
+        </div>
+        <div class="progresswrap" title="Overall progress">
+          <div class="dots" aria-hidden="true">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          </div>
+          <div class="bar" aria-hidden="true"><span id="progressBar"></span></div>
+          <div class="pct" id="progressText">0%</div>
+        </div>
+      </div>
+
+      <!-- PAGE: Dashboard -->
+      <section id="dashboard" class="page active">
+        <div class="card">
+          <div class="head">
+            <h3>Dashboard</h3>
+            <span class="tag blue">Framework Overview</span>
+          </div>
+          <div class="body">
+            <div class="grid3">
+              <!-- Module 1 -->
+              <div class="card module">
+                <div class="head">
+                  <h3>1. Define Topics & Objectives</h3>
+                  <span class="tag orange" id="statusM1">In Progress</span>
+                </div>
+                <div class="body">
+                  <div class="modicon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M12 22a10 10 0 1 0-10-10" stroke="rgba(15,23,42,.9)" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M12 18a6 6 0 1 0-6-6" stroke="rgba(15,23,42,.85)" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M12 14a2 2 0 1 0-2-2" stroke="rgba(15,23,42,.8)" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M21 3l-8 8" stroke="rgba(245,158,11,.95)" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M21 3l-2 7-5-5 7-2z" fill="rgba(245,158,11,.95)"/>
+                    </svg>
+                  </div>
+                  <h4>Set Learning Goals</h4>
+                  <p>Enter learner profile, prerequisites, topic scope, and objectives. Produces the Module 1 blueprint.</p>
+                  <div class="status">
+                    <span class="tag orange">Define</span>
+                    <button class="btn secondary" onclick="go('module1')">Open</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Module 2 -->
+              <div class="card module">
+                <div class="head">
+                  <h3>2. AI Content Generation</h3>
+                  <span class="tag gray" id="statusM2">Not Started</span>
+                </div>
+                <div class="body">
+                  <div class="modicon" style="background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.25)" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M9 21c-2.2 0-4-1.8-4-4V8c0-2.2 1.8-4 4-4" stroke="rgba(15,23,42,.85)" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M15 21c2.2 0 4-1.8 4-4V8c0-2.2-1.8-4-4-4" stroke="rgba(15,23,42,.85)" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M9 7c0-1.1.9-2 2-2h2c1.1 0 2 .9 2 2" stroke="rgba(15,23,42,.75)" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M8 12h2m4 0h2M9 16h2m4 0h2" stroke="rgba(20,184,166,.95)" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                  <h4>Create Educational Content</h4>
+                  <p>Generate lecture notes, worked examples, and exercises aligned with the blueprint and constraints.</p>
+                  <div class="status">
+                    <span class="tag gray">Generate</span>
+                    <button class="btn secondary" onclick="go('module2')">Open</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Module 3 -->
+              <div class="card module">
+                <div class="head">
+                  <h3>3. Review & Refine</h3>
+                  <span class="tag blue" id="statusM3">Pending</span>
+                </div>
+                <div class="body">
+                  <div class="modicon" style="background:rgba(31,62,102,.10);border-color:rgba(31,62,102,.22)" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" stroke="rgba(15,23,42,.85)" stroke-width="2"/>
+                      <path d="M8 8h8M8 12h8M8 16h5" stroke="rgba(15,23,42,.7)" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M16.5 15.5l1 1 2-2" stroke="rgba(20,184,166,.95)" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                  <h4>Expert Review</h4>
+                  <p>View validation report and save expert rubric ratings to the run folder (CSV).</p>
+                  <div class="status">
+                    <span class="tag blue">Review</span>
+                    <button class="btn secondary" onclick="go('module3')">Open</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE: Module 1 -->
+      <section id="module1" class="page">
+        <div class="grid2">
+          <div class="card">
+            <div class="head">
+              <h3>Instructor Inputs</h3>
+              <span class="tag orange">Module 1</span>
+            </div>
+            <div class="body">
+
+              <div class="row">
+                <div class="field">
+                  <label>Backend Mode (textbox)</label>
+                  <input id="mode" value="llama" placeholder="llama or openai"/>
+                  <div class="smallmuted">Use: <b>llama</b> (offline) or <b>openai</b> (gpt-4.1-mini)</div>
+                </div>
+                <div class="field">
+                  <label>Max refinement loops (textbox)</label>
+                  <input id="maxRefine" value="1" placeholder="0 to 3"/>
+                  <div class="smallmuted">For local llama, set 0 or 1 to avoid slow runs.</div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Topic scope (textbox)</label>
+                <input id="topicScope" value="Robot motion planning and control for construction robotics (1 lecture)." />
+              </div>
+
+              <div class="row">
+                <div class="field">
+                  <label>Learner profile (textbox)</label>
+                  <textarea id="learnerProfile">Graduate students with basic robotics and programming.</textarea>
+                </div>
+                <div class="field">
+                  <label>Prerequisites (textbox)</label>
+                  <textarea id="prereqs">Linear algebra, basic probability, Python/MATLAB.</textarea>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Learning objectives (optional textbox)</label>
+                <textarea id="learningObjectives" placeholder="Leave blank to let the model generate objectives."></textarea>
+              </div>
+
+              <div class="row">
+                <div class="field">
+                  <label>Duration & format (textbox)</label>
+                  <textarea id="durationFormat" placeholder="60 minutes; lecture notes + examples + exercises"></textarea>
+                </div>
+                <div class="field">
+                  <label>Constraints (textbox)</label>
+                  <textarea id="constraints" placeholder="Simple academic tone; concise; consistent notation."></textarea>
+                </div>
+              </div>
+
+              <button class="btn" id="runBtn">Run Pipeline (Module 1→2→3)</button>
+              <button class="btn secondary" style="margin-top:10px;width:100%;" onclick="go('module2')">Go to Module 2 →</button>
+
+              <div class="smallmuted" id="runInfo">No run yet.</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="head">
+              <h3>Blueprint Preview (Module 1 Output)</h3>
+              <span class="tag gray">Readable View</span>
+            </div>
+            <div class="body" id="blueprintUI">
+              <div class="contentblock highlight">No blueprint yet. Run the pipeline.</div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- PAGE: Module 2 -->
+      <section id="module2" class="page">
+        <div class="grid2">
+          <div class="card">
+            <div class="head">
+              <h3>Generate / Regenerate</h3>
+              <span class="tag gray">Module 2</span>
+            </div>
+            <div class="body">
+              <div class="field">
+                <label>Notes</label>
+                <textarea id="module2Note" placeholder="You can add extra instructions here (optional)."></textarea>
+              </div>
+
+              <button class="btn" id="generateBtn">Generate Content (Run Pipeline)</button>
+              <button class="btn secondary" id="regenBtn" style="margin-top:10px;width:100%;">Regenerate (Run Again)</button>
+
+              <div class="smallmuted">
+                This will call <code>/api/run</code> and update lecture notes, examples, and exercises.
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="head">
+              <h3>AI-Generated Output</h3>
+              <span class="tag blue">Lecture Notes / Examples / Exercises</span>
+            </div>
+
+            <div class="tabs" role="tablist">
+              <button class="tab active" data-tab="notes">Lecture Notes</button>
+              <button class="tab" data-tab="examples">Examples</button>
+              <button class="tab" data-tab="exercises">Exercises</button>
+            </div>
+
+            <div class="body">
+              <div id="tab-notes" class="tabpane">
+                <div class="contentblock highlight">No content yet. Run the pipeline.</div>
+              </div>
+
+              <div id="tab-examples" class="tabpane" style="display:none;">
+                <div class="contentblock highlight">No examples yet. Run the pipeline.</div>
+              </div>
+
+              <div id="tab-exercises" class="tabpane" style="display:none;">
+                <div class="contentblock highlight">No exercises yet. Run the pipeline.</div>
+              </div>
+
+              <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">
+                <button class="btn secondary" onclick="go('module1')">← Back</button>
+                <button class="btn" onclick="go('module3')">Continue → Module 3</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE: Module 3 -->
+      <section id="module3" class="page">
+        <div class="grid2">
+          <div class="card">
+            <div class="head">
+              <h3>Validation Report + Paths</h3>
+              <span class="tag blue">Module 3</span>
+            </div>
+            <div class="body">
+              <div class="contentblock">
+                <strong>Run folder</strong><br/>
+                <span id="runDirText">—</span>
+              </div>
+              <div class="contentblock">
+                <strong>Markdown exported</strong><br/>
+                <span id="mdPathText">—</span>
+              </div>
+
+              <div class="contentblock">
+                <strong>Validation report (JSON)</strong>
+                <pre class="json" id="reportJson">{}</pre>
+              </div>
+
+              <button class="btn secondary" onclick="go('module2')">← Back to content</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="head">
+              <h3>Expert Evaluation (save to CSV)</h3>
+              <span class="tag gray">Rubric</span>
+            </div>
+            <div class="body">
+              <div class="field">
+                <label>Expert name/ID (textbox)</label>
+                <input id="expertName" value="Expert-1"/>
+              </div>
+
+              <div class="field">
+                <label>Topic (textbox)</label>
+                <input id="reviewTopic" value=""/>
+              </div>
+
+              <div class="row">
+                <div class="field">
+                  <label>Technical accuracy (1–5 textbox)</label>
+                  <input id="scoreTech" value="4"/>
+                </div>
+                <div class="field">
+                  <label>Conceptual completeness (1–5 textbox)</label>
+                  <input id="scoreComp" value="4"/>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="field">
+                  <label>Pedagogical clarity (1–5 textbox)</label>
+                  <input id="scoreClar" value="4"/>
+                </div>
+                <div class="field">
+                  <label>Objective alignment (1–5 textbox)</label>
+                  <input id="scoreAlign" value="4"/>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Overall quality (1–5 textbox)</label>
+                <input id="scoreQual" value="4"/>
+              </div>
+
+              <div class="field">
+                <label>Comments / suggested fixes (textbox)</label>
+                <textarea id="reviewComments" placeholder="Write suggestions here..."></textarea>
+              </div>
+
+              <button class="btn" id="saveReviewBtn">Save Expert Review</button>
+              <div class="smallmuted" id="reviewSavedText">Not saved yet.</div>
+
+              <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">
+                <button class="btn secondary" onclick="go('module2')">← Revisions</button>
+                <button class="btn secondary" onclick="go('dashboard')">Back to Dashboard</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    // --------------------------
+    // Navigation
+    // --------------------------
+    const navBtns = document.querySelectorAll(".navbtn");
+    const pages = document.querySelectorAll(".page");
+
+    function setActive(pageId){
+      pages.forEach(p => p.classList.toggle("active", p.id === pageId));
+      navBtns.forEach(b => b.classList.toggle("active", b.dataset.page === pageId));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    function go(pageId){ setActive(pageId); }
+    window.go = go;
+    navBtns.forEach(btn => btn.addEventListener("click", () => setActive(btn.dataset.page)));
+
+    // --------------------------
+    // Tabs (Module 2)
+    // --------------------------
+    const tabs = document.querySelectorAll(".tab");
+    const panes = {
+      notes: document.getElementById("tab-notes"),
+      examples: document.getElementById("tab-examples"),
+      exercises: document.getElementById("tab-exercises"),
+    };
+    tabs.forEach(t => {
+      t.addEventListener("click", () => {
+        tabs.forEach(x => x.classList.remove("active"));
+        t.classList.add("active");
+        Object.keys(panes).forEach(k => panes[k].style.display = (k === t.dataset.tab) ? "block" : "none");
+      });
+    });
+
+    // --------------------------
+    // Helpers
+    // --------------------------
+    function pretty(obj){ return JSON.stringify(obj ?? {}, null, 2); }
+
+    function clampScore(x){
+      const n = parseInt(String(x || "").trim(), 10);
+      if (Number.isNaN(n)) return 1;
+      return Math.max(1, Math.min(5, n));
+    }
+
+    function setProgress(percent){
+      const p = Math.max(0, Math.min(100, percent));
+      document.getElementById("progressBar").style.width = p + "%";
+      document.getElementById("progressText").textContent = p + "%";
+    }
+
+    function setStatuses(hasRun){
+      document.getElementById("statusM1").textContent = hasRun ? "Done" : "In Progress";
+      document.getElementById("statusM1").className = hasRun ? "tag blue" : "tag orange";
+
+      document.getElementById("statusM2").textContent = hasRun ? "Done" : "Not Started";
+      document.getElementById("statusM2").className = hasRun ? "tag blue" : "tag gray";
+
+      document.getElementById("statusM3").textContent = hasRun ? "Ready" : "Pending";
+      document.getElementById("statusM3").className = hasRun ? "tag blue" : "tag blue";
+    }
+
+    function renderOutputs(materials){
+      // Lecture Notes
+      const notesPane = document.getElementById("tab-notes");
+      notesPane.innerHTML = "";
+      const notes = (materials && materials.lecture_notes) ? materials.lecture_notes : [];
+      if (!notes.length){
+        notesPane.innerHTML = `<div class="contentblock highlight">No lecture notes returned.</div>`;
+      } else {
+        notes.forEach(sec=>{
+          const div = document.createElement("div");
+          div.className = "contentblock";
+          div.innerHTML = `
+            <h4 style="margin:0 0 8px;font-size:15px;">${sec.title || "Section"}</h4>
+            <div style="line-height:1.55;color:rgba(15,23,42,.82)">${String(sec.content || "").replaceAll("\n","<br>")}</div>
+          `;
+          notesPane.appendChild(div);
+        });
+      }
+
+      // Examples
+      const exPane = document.getElementById("tab-examples");
+      exPane.innerHTML = "";
+      const examples = (materials && materials.worked_examples) ? materials.worked_examples : [];
+      if (!examples.length){
+        exPane.innerHTML = `<div class="contentblock highlight">No worked examples returned.</div>`;
+      } else {
+        examples.forEach(ex=>{
+          const steps = ex.steps;
+          const body = Array.isArray(steps)
+            ? `<ul style="margin:8px 0 0 18px;">${steps.map(s=>`<li>${s}</li>`).join("")}</ul>`
+            : `<div style="margin-top:8px;line-height:1.55">${String(steps || "").replaceAll("\n","<br>")}</div>`;
+          const div = document.createElement("div");
+          div.className = "contentblock";
+          div.innerHTML = `<strong>${ex.title || "Example"}</strong>${body}`;
+          exPane.appendChild(div);
+        });
+      }
+
+      // Exercises
+      const hwPane = document.getElementById("tab-exercises");
+      hwPane.innerHTML = "";
+      const exercises = (materials && materials.exercises) ? materials.exercises : [];
+      if (!exercises.length){
+        hwPane.innerHTML = `<div class="contentblock highlight">No exercises returned.</div>`;
+      } else {
+        exercises.forEach((ex,i)=>{
+          const div = document.createElement("div");
+          div.className = "contentblock";
+          div.innerHTML = `
+            <strong>Exercise ${i+1}: ${ex.title || ""}</strong><br>
+            <span style="color:rgba(15,23,42,.65);font-size:12px;">Difficulty: ${ex.difficulty || ""}</span>
+            <div style="margin-top:8px;line-height:1.55">${String(ex.prompt || "").replaceAll("\n","<br>")}</div>
+          `;
+          hwPane.appendChild(div);
+        });
+      }
+    }
+
+    // --------------------------
+    // API Calls
+    // --------------------------
+    let __RUN_DIR__ = "";
+    let __MD_PATH__ = "";
+
+    async function runPipeline(){
+      const runBtn = document.getElementById("runBtn");
+      const generateBtn = document.getElementById("generateBtn");
+      const regenBtn = document.getElementById("regenBtn");
+
+      const mode = (document.getElementById("mode").value || "llama").trim().toLowerCase();
+      const max_refine_iters = parseInt((document.getElementById("maxRefine").value || "1").trim(), 10) || 0;
+
+      const payload = {
+        mode: mode,
+        max_refine_iters: max_refine_iters,
+        learner_profile: document.getElementById("learnerProfile").value || "",
+        prerequisites: document.getElementById("prereqs").value || "",
+        topic_scope: document.getElementById("topicScope").value || "",
+        learning_objectives: document.getElementById("learningObjectives").value || "",
+        duration_format: document.getElementById("durationFormat").value || "",
+        constraints: document.getElementById("constraints").value || ""
+      };
+
+      // basic guard
+      if (!payload.topic_scope.trim()){
+        alert("Please fill Topic scope.");
+        return;
+      }
+
+      // UI state
+      [runBtn, generateBtn, regenBtn].forEach(b => { if(b) b.disabled = true; });
+      if (runBtn) runBtn.textContent = "Running...";
+      if (generateBtn) generateBtn.textContent = "Generating...";
+      if (regenBtn) regenBtn.textContent = "Generating...";
+
+      try{
+        setProgress(25);
+
+        const res = await fetch("/api/run", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok){
+          const txt = await res.text();
+          throw new Error(txt || ("HTTP " + res.status));
+        }
+
+        const data = await res.json();
+        renderBlueprintUI(data.blueprint);
+
+        __RUN_DIR__ = data.run_dir || "";
+        __MD_PATH__ = data.markdown_path || "";
+
+        // Update previews
+       function renderBlueprintUI(blueprint){
+  const root = document.getElementById("blueprintUI");
+  if(!root) return;
+
+  const subtopics = blueprint?.subtopics || [];
+  const objectives = blueprint?.learning_objectives || [];
+  const prereq = blueprint?.prerequisite_map || {};
+  const diff = blueprint?.difficulty_map || {};
+
+  if(!subtopics.length && !objectives.length){
+    root.innerHTML = `<div class="contentblock highlight">No blueprint data returned.</div>`;
+    return;
+  }
+
+  // Build top lists
+  const subtopicsHtml = subtopics.length
+    ? `<ol style="margin:8px 0 0 18px;line-height:1.55;">
+         ${subtopics.map(s=>`<li>${s}</li>`).join("")}
+       </ol>`
+    : `<div class="smallmuted">No subtopics.</div>`;
+
+  const objHtml = objectives.length
+    ? `<ul style="margin:8px 0 0 18px;line-height:1.55;">
+         ${objectives.map(o=>`<li>${o}</li>`).join("")}
+       </ul>`
+    : `<div class="smallmuted">No learning objectives.</div>`;
+
+  // Build subtopic cards with prereqs + difficulty
+  const cardsHtml = subtopics.map((s) => {
+    const d = (diff[s] || "").toLowerCase();
+    const badgeClass =
+      d.includes("intro") ? "intro" :
+      d.includes("advanced") ? "advanced" :
+      "intermediate";
+
+    const prereqs = Array.isArray(prereq[s]) ? prereq[s] : [];
+    const prereqText = prereqs.length ? prereqs.join(", ") : "None";
+
+    return `
+      <div class="itemcard">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+          <h4>${s}</h4>
+          <span class="badge2 ${badgeClass}">${d || "intermediate"}</span>
+        </div>
+        <div class="meta"><b>Prereqs:</b> ${prereqText}</div>
+      </div>
+    `;
+  }).join("");
+
+  root.innerHTML = `
+    <div class="contentblock">
+      <strong>Subtopics</strong>
+      ${subtopicsHtml}
+    </div>
+
+    <div class="contentblock">
+      <strong>Learning Objectives</strong>
+      ${objHtml}
+    </div>
+
+    <div class="contentblock">
+      <strong>Prerequisites & Difficulty (by subtopic)</strong>
+      <div style="margin-top:10px;">${cardsHtml || `<div class="smallmuted">No subtopic details.</div>`}</div>
+    </div>
+  `;
+}
+
+        document.getElementById("reportJson").textContent = pretty(data.report);
+
+        document.getElementById("runDirText").textContent = __RUN_DIR__ || "—";
+        document.getElementById("mdPathText").textContent = __MD_PATH__ || "—";
+
+        document.getElementById("runInfo").textContent = __RUN_DIR__
+          ? ("Last run: " + __RUN_DIR__ + " | Markdown: " + __MD_PATH__)
+          : "Run completed, but run folder missing.";
+
+        // Set topic into review
+        document.getElementById("reviewTopic").value = payload.topic_scope;
+
+        // Render materials
+        renderOutputs(data.final_materials);
+
+        setStatuses(true);
+        setProgress(80);
+
+        // Go to module2 to show outputs
+        go("module2");
+        setProgress(100);
+
+      } catch(e){
+        console.error(e);
+        alert("Error running pipeline:\n" + e.message);
+        setProgress(0);
+      } finally {
+        [runBtn, generateBtn, regenBtn].forEach(b => { if(b) b.disabled = false; });
+        if (runBtn) runBtn.textContent = "Run Pipeline (Module 1→2→3)";
+        if (generateBtn) generateBtn.textContent = "Generate Content (Run Pipeline)";
+        if (regenBtn) regenBtn.textContent = "Regenerate (Run Again)";
+      }
+    }
+
+    async function saveExpertReview(){
+      const savedText = document.getElementById("reviewSavedText");
+
+      if (!__RUN_DIR__){
+        alert("Run the pipeline first (no run_dir found).");
+        return;
+      }
+
+      const payload = {
+        run_dir: __RUN_DIR__,
+        expert_name: document.getElementById("expertName").value || "Expert-1",
+        topic: document.getElementById("reviewTopic").value || "",
+        technical_accuracy_1to5: clampScore(document.getElementById("scoreTech").value),
+        conceptual_completeness_1to5: clampScore(document.getElementById("scoreComp").value),
+        pedagogical_clarity_1to5: clampScore(document.getElementById("scoreClar").value),
+        objective_alignment_1to5: clampScore(document.getElementById("scoreAlign").value),
+        overall_quality_1to5: clampScore(document.getElementById("scoreQual").value),
+        comments: document.getElementById("reviewComments").value || ""
+      };
+
+      try{
+        savedText.textContent = "Saving...";
+        const res = await fetch("/api/review", {
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok){
+          const txt = await res.text();
+          throw new Error(txt || ("HTTP " + res.status));
+        }
+
+        const data = await res.json();
+        savedText.textContent = "Saved to: " + (data.saved_to || "(unknown)");
+
+        // jump to module3 so user sees report + saved status
+        go("module3");
+
+      } catch(e){
+        console.error(e);
+        savedText.textContent = "Save failed.";
+        alert("Error saving review:\n" + e.message);
+      }
+    }
+
+    // --------------------------
+    // Wire buttons
+    // --------------------------
+    document.getElementById("runBtn").addEventListener("click", runPipeline);
+    document.getElementById("generateBtn").addEventListener("click", runPipeline);
+    document.getElementById("regenBtn").addEventListener("click", runPipeline);
+    document.getElementById("saveReviewBtn").addEventListener("click", saveExpertReview);
+
+    // Initial
+    setStatuses(false);
+    setProgress(0);
+  </script>
+</body>
+</html>

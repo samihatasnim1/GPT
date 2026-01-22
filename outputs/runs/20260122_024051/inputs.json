@@ -1,0 +1,8 @@
+{
+  "learner_profile": "Graduate students with basic robotics and programming.",
+  "prerequisites": "Linear algebra, basic probability, Python/MATLAB.",
+  "topic_scope": "Robot motion planning and control for construction robotics (1 lecture).",
+  "learning_objectives": "",
+  "duration_format": "60 minutes; lecture notes + examples + exercises",
+  "constraints": "Simple academic tone; concise; consistent notation."
+}

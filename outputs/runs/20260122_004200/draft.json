@@ -1,0 +1,109 @@
+{
+  "lecture_notes": [
+    {
+      "title": "Introduction to Robot Motion Planning in Construction Robotics",
+      "content": "Robot motion planning involves determining a sequence of valid configurations that moves a robot from a start to a goal position. In construction robotics, this planning must consider complex environments, safety, and task-specific constraints. Key concepts include workspace representation, obstacle avoidance, and task feasibility."
+    },
+    {
+      "title": "Kinematic and Dynamic Models of Construction Robots",
+      "content": "Kinematics describes the motion of robots without considering forces, focusing on position, velocity, and acceleration. Dynamics includes forces and torques affecting motion. Construction robots often have articulated arms or mobile bases, modeled using forward and inverse kinematics, and dynamic equations derived from Newton-Euler or Lagrangian methods."
+    },
+    {
+      "title": "Path Planning Algorithms: Graph-based and Sampling-based Methods",
+      "content": "Graph-based methods represent the environment as nodes and edges, using algorithms like Dijkstra's or A*. Sampling-based methods, such as Rapidly-exploring Random Trees (RRT) and Probabilistic Roadmaps (PRM), explore the configuration space by random sampling, suitable for high-dimensional or complex environments common in construction."
+    },
+    {
+      "title": "Motion Control Techniques for Construction Robots",
+      "content": "Motion control ensures the robot follows planned paths accurately. Techniques include PID control, computed torque control, and model predictive control. Controllers must handle uncertainties and disturbances typical in construction sites, ensuring stability and precision."
+    },
+    {
+      "title": "Integration of Planning and Control in Construction Tasks",
+      "content": "Effective construction robotics requires seamless integration of motion planning and control. This involves real-time feedback, replanning in dynamic environments, and coordination between path planners and controllers to execute tasks like material handling or assembly."
+    },
+    {
+      "title": "Case Studies and Practical Examples",
+      "content": "This section reviews real-world applications of motion planning and control in construction robotics. Examples include autonomous bricklaying robots, mobile manipulators for material transport, and robotic arms for welding and assembly, highlighting challenges and solutions."
+    }
+  ],
+  "worked_examples": [
+    {
+      "title": "Forward Kinematics of a 3-DOF Construction Robot Arm",
+      "steps": [
+        "Define joint parameters and link lengths.",
+        "Use Denavit-Hartenberg convention to assign coordinate frames.",
+        "Calculate transformation matrices for each joint.",
+        "Multiply matrices to find the end-effector position and orientation.",
+        "Interpret the resulting pose in the workspace."
+      ]
+    },
+    {
+      "title": "Applying A* Algorithm for Path Planning in a Construction Site",
+      "steps": [
+        "Represent the construction site as a grid map with obstacles.",
+        "Define start and goal nodes.",
+        "Initialize open and closed lists.",
+        "Iteratively select the node with lowest cost from open list.",
+        "Expand neighbors, update costs and parent nodes.",
+        "Repeat until goal is reached or no path exists.",
+        "Trace back the path from goal to start."
+      ]
+    },
+    {
+      "title": "Designing a PID Controller for a Construction Robot Joint",
+      "steps": [
+        "Identify the joint dynamics and desired trajectory.",
+        "Select initial PID gains based on system response.",
+        "Implement the PID control law: control signal = Kp*error + Ki*integral(error) + Kd*derivative(error).",
+        "Simulate the response to a step input.",
+        "Tune gains to minimize overshoot and steady-state error.",
+        "Validate controller performance under disturbances."
+      ]
+    },
+    {
+      "title": "Integrating RRT Path Planning with Motion Control for Material Handling",
+      "steps": [
+        "Model the robot and environment configuration space.",
+        "Run RRT to generate a collision-free path from start to goal.",
+        "Smooth the path to reduce unnecessary movements.",
+        "Design a motion controller to follow the path waypoints.",
+        "Implement feedback to correct deviations during execution.",
+        "Test integration in a simulated construction task."
+      ]
+    }
+  ],
+  "exercises": [
+    {
+      "title": "Modeling the Kinematics of a Mobile Construction Robot",
+      "prompt": "Given a differential drive mobile robot used in construction, derive the forward kinematic equations relating wheel velocities to robot position and orientation. Discuss how wheel slip might affect the model.",
+      "difficulty": "intermediate"
+    },
+    {
+      "title": "Path Planning Using Probabilistic Roadmaps",
+      "prompt": "Construct a probabilistic roadmap for a construction site environment with multiple obstacles. Explain how to select milestones and connect them. Plan a path from a start to a goal configuration and discuss the advantages of this method in construction scenarios.",
+      "difficulty": "intermediate"
+    },
+    {
+      "title": "Design a Motion Controller for a Construction Robot Arm",
+      "prompt": "Design a computed torque controller for a 2-DOF robot arm performing assembly tasks. Include the derivation of control laws and simulate the response to a desired trajectory.",
+      "difficulty": "intermediate"
+    },
+    {
+      "title": "Integrate Path Planning and Control for a Bricklaying Robot",
+      "prompt": "Develop a strategy to integrate path planning and motion control for a robot performing bricklaying. Consider dynamic obstacles and task constraints. Describe how feedback and replanning can improve task execution.",
+      "difficulty": "advanced"
+    },
+    {
+      "title": "Analyze a Case Study of Autonomous Material Transport",
+      "prompt": "Review a case study of an autonomous robot transporting materials on a construction site. Identify the motion planning and control techniques used. Critically analyze their effectiveness and suggest possible improvements.",
+      "difficulty": "advanced"
+    },
+    {
+      "title": "Solve a Combined Planning and Control Problem",
+      "prompt": "Given a construction robot tasked with navigating a cluttered environment and manipulating objects, formulate a combined planning and control problem. Propose a solution approach and justify your choices.",
+      "difficulty": "advanced"
+    }
+  ],
+  "metadata": {
+    "objective_coverage_note": "The course materials comprehensively cover all learning objectives from fundamentals of motion planning to advanced integration and problem solving in construction robotics, ensuring alignment with prerequisite knowledge and appropriate difficulty progression."
+  }
+}

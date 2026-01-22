@@ -1,0 +1,109 @@
+{
+  "lecture_notes": [
+    {
+      "title": "Introduction to Robot Motion Planning in Construction",
+      "content": "This lecture introduces the role of motion planning and control in construction robotics. We discuss how robots improve efficiency, safety, and precision in construction tasks. Key concepts include the definition of motion planning, control systems, and their importance in navigating complex construction environments."
+    },
+    {
+      "title": "Kinematic and Dynamic Models of Construction Robots",
+      "content": "This lecture covers the mathematical modeling of construction robots. We explore kinematic models describing robot motion without forces, including forward and inverse kinematics. Dynamic models incorporate forces and torques affecting robot movement. Examples include robotic arms and mobile platforms used in construction."
+    },
+    {
+      "title": "Path Planning Algorithms for Construction Tasks",
+      "content": "We examine common path planning algorithms such as grid-based search, sampling-based methods like RRT (Rapidly-exploring Random Trees), and probabilistic roadmaps. Their application to construction scenarios, including obstacle avoidance and workspace constraints, is discussed."
+    },
+    {
+      "title": "Motion Control Strategies",
+      "content": "This lecture introduces control strategies for executing planned paths. Topics include feedback control, PID controllers, and trajectory tracking. Emphasis is placed on designing controllers suitable for construction robots to ensure accurate and stable motion."
+    },
+    {
+      "title": "Integration of Planning and Control in Construction Robotics",
+      "content": "We discuss methods to integrate path planning and motion control for seamless robot operation. Topics include hierarchical control architectures, real-time replanning, and sensor feedback integration to handle dynamic construction environments."
+    },
+    {
+      "title": "Case Studies and Practical Examples",
+      "content": "This lecture analyzes real-world examples of construction robots performing tasks such as bricklaying, material transport, and inspection. Challenges like uneven terrain and dynamic obstacles are highlighted along with solutions implemented."
+    }
+  ],
+  "worked_examples": [
+    {
+      "title": "Forward Kinematics of a Construction Robot Arm",
+      "steps": [
+        "Define the robot arm's joint parameters and link lengths.",
+        "Use transformation matrices to represent each joint's rotation and translation.",
+        "Multiply matrices sequentially to find the end-effector position.",
+        "Calculate the final position coordinates in the workspace."
+      ]
+    },
+    {
+      "title": "Applying RRT for Path Planning in a Construction Site",
+      "steps": [
+        "Initialize the tree with the robot's start position.",
+        "Randomly sample points in the workspace.",
+        "Extend the tree towards sampled points while avoiding obstacles.",
+        "Repeat until the goal position is reached or maximum iterations are done.",
+        "Extract the path from start to goal by tracing tree nodes."
+      ]
+    },
+    {
+      "title": "Designing a PID Controller for Robot Trajectory Tracking",
+      "steps": [
+        "Define the desired trajectory and current robot position.",
+        "Calculate the error between desired and actual positions.",
+        "Apply proportional, integral, and derivative gains to compute control input.",
+        "Adjust gains to minimize tracking error and ensure stability.",
+        "Implement the controller and observe robot response."
+      ]
+    },
+    {
+      "title": "Integrating Path Planning and Control for Dynamic Obstacle Avoidance",
+      "steps": [
+        "Plan an initial path using a sampling-based algorithm.",
+        "Use sensor data to detect moving obstacles in real time.",
+        "Modify the planned path dynamically to avoid obstacles.",
+        "Adjust control inputs to follow the updated path smoothly.",
+        "Validate the integrated system through simulation or experiment."
+      ]
+    }
+  ],
+  "exercises": [
+    {
+      "title": "Explain the Role of Motion Planning in Construction Robotics",
+      "prompt": "Describe why motion planning and control are critical for construction robots and provide examples of tasks that benefit from these techniques.",
+      "difficulty": "intro"
+    },
+    {
+      "title": "Model the Kinematics of a Mobile Construction Robot",
+      "prompt": "Given a differential drive robot used on a construction site, derive the forward kinematic equations relating wheel velocities to robot position and orientation.",
+      "difficulty": "intermediate"
+    },
+    {
+      "title": "Implement a Simple Grid-Based Path Planning Algorithm",
+      "prompt": "Write pseudocode for a grid-based search algorithm to find a collision-free path for a robot navigating a construction site with obstacles.",
+      "difficulty": "intermediate"
+    },
+    {
+      "title": "Design a PID Controller for a Construction Robot Arm",
+      "prompt": "Given a desired joint trajectory, design a PID controller to minimize tracking error. Discuss how to tune the controller gains.",
+      "difficulty": "intermediate"
+    },
+    {
+      "title": "Integrate Planning and Control for a Robot in a Dynamic Environment",
+      "prompt": "Explain how you would combine path planning and motion control to enable a construction robot to operate safely around moving obstacles.",
+      "difficulty": "advanced"
+    },
+    {
+      "title": "Analyze a Case Study of a Bricklaying Robot",
+      "prompt": "Review a case study of a bricklaying robot and identify the main motion planning and control challenges it faced. Suggest possible improvements.",
+      "difficulty": "intermediate"
+    },
+    {
+      "title": "Solve a Motion Planning Problem with Obstacles",
+      "prompt": "Given a map of a construction site with static obstacles, plan a collision-free path for a robot and describe the control strategy to follow this path.",
+      "difficulty": "intermediate"
+    }
+  ],
+  "metadata": {
+    "objective_coverage_note": "The course materials comprehensively cover all learning objectives from foundational concepts to advanced integration of planning and control, including modeling, algorithm application, control design, case study analysis, and practical problem solving."
+  }
+}
