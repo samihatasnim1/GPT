@@ -865,7 +865,7 @@
       const generateBtn = document.getElementById("generateBtn");
       const regenBtn = document.getElementById("regenBtn");
 
-      const mode = (document.getElementById("mode").value || "llama").trim().toLowerCase();
+      const mode = (document.getElementById("mode").value || "openai").trim().toLowerCase();
       const max_refine_iters = parseInt((document.getElementById("maxRefine").value || "1").trim(), 10) || 0;
 
       const payload = {
@@ -1073,6 +1073,7 @@
   </script>
 </body>
 </html>
+
 
 
 
