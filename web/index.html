@@ -388,6 +388,47 @@
   font-size:12px;
 }
 
+       /* Validation ring */
+.ring{
+  width:92px;height:92px;
+  position:relative;
+  display:grid;
+  place-items:center;
+}
+.ring svg{ display:block; }
+.ring-bg{
+  fill:none;
+  stroke: rgba(15,23,42,.12);
+  stroke-width:12;
+}
+.ring-fg{
+  fill:none;
+  stroke-width:12;
+  stroke-linecap:round;
+  stroke: var(--teal);
+  transform: rotate(-90deg);
+  transform-origin: 60px 60px;
+  stroke-dasharray: 289;
+  stroke-dashoffset: 289;
+  transition: stroke-dashoffset .5s ease, stroke .2s ease;
+}
+.ring-text{
+  position:absolute;
+  text-align:center;
+  line-height:1.1;
+}
+.ring-pct{ font-weight:1000; font-size:18px; }
+.ring-sub{ font-size:11px; color: var(--muted); font-weight:800; }
+
+/* Issues list */
+.issues{
+  border:1px solid rgba(245,158,11,.25);
+  background: rgba(245,158,11,.10);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+
   </style>
 </head>
 
@@ -663,10 +704,37 @@
                 <span id="mdPathText">—</span>
               </div>
 
-              <div class="contentblock">
-                <strong>Validation report (JSON)</strong>
-                <pre class="json" id="reportJson">{}</pre>
-              </div>
+               <div class="contentblock">
+                 <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                   <strong>Validation Summary</strong>
+                   <span id="valBadge" class="tag gray">Not run</span>
+                 </div>
+               
+                 <div style="display:flex;gap:16px;align-items:center;margin-top:12px;flex-wrap:wrap;">
+                   <!-- Circle progress -->
+                   <div class="ring" id="valRing" aria-label="Validation score">
+                     <svg width="92" height="92" viewBox="0 0 120 120">
+                       <circle class="ring-bg" cx="60" cy="60" r="46"></circle>
+                       <circle class="ring-fg" id="ringArc" cx="60" cy="60" r="46"></circle>
+                     </svg>
+                     <div class="ring-text">
+                       <div id="valPct" class="ring-pct">0%</div>
+                       <div class="ring-sub">Score</div>
+                     </div>
+                   </div>
+               
+                   <!-- Details -->
+                   <div style="flex:1;min-width:260px;">
+                     <div class="smallmuted" id="valMeta">Run the pipeline to see validation results.</div>
+               
+                     <div id="valIssuesBox" class="issues" style="display:none;margin-top:10px;">
+                       <div style="font-weight:900;margin-bottom:6px;">Reasons (issues)</div>
+                       <ul id="valIssues" style="margin:0 0 0 18px;line-height:1.55;"></ul>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+
 
               <button class="btn secondary" onclick="go('module2')">← Back to content</button>
             </div>
@@ -988,8 +1056,7 @@
   `;
 }
 
-        document.getElementById("reportJson").textContent = pretty(data.report);
-
+        setValidationUI(data.report);
         document.getElementById("runDirText").textContent = __RUN_DIR__ || "—";
         document.getElementById("mdPathText").textContent = __MD_PATH__ || "—";
 
@@ -1080,9 +1147,72 @@
     // Initial
     setStatuses(false);
     setProgress(0);
+
+function computeValidationScore(report){
+  // Simple rule: start at 100 and subtract 20 per issue.
+  // You can change weights later (example: major vs minor).
+  const issues = Array.isArray(report?.issues) ? report.issues : [];
+  let score = 100 - (issues.length * 20);
+  score = Math.max(0, Math.min(100, score));
+  return score;
+}
+
+function setValidationUI(report){
+  const badge = document.getElementById("valBadge");
+  const pctEl = document.getElementById("valPct");
+  const arc = document.getElementById("ringArc");
+  const meta = document.getElementById("valMeta");
+  const issuesBox = document.getElementById("valIssuesBox");
+  const issuesList = document.getElementById("valIssues");
+
+  const passed = !!report?.passed;
+  const issues = Array.isArray(report?.issues) ? report.issues : [];
+  const iters = (report?.iterations ?? report?.iteration ?? 0);
+
+  const score = computeValidationScore(report);
+
+  // ring math
+  const circumference = 289; // matches CSS dasharray (2*pi*r with r≈46)
+  const offset = circumference - (circumference * score / 100);
+
+  pctEl.textContent = `${score}%`;
+  arc.style.strokeDashoffset = String(offset);
+
+  // color + badge
+  if (passed){
+    badge.textContent = "PASSED";
+    badge.className = "tag blue";
+    arc.style.stroke = "var(--teal)";
+    meta.textContent = `Passed validation (iterations: ${iters}). All checks satisfied.`;
+    issuesBox.style.display = "none";
+    issuesList.innerHTML = "";
+  } else {
+    badge.textContent = "FAILED";
+    badge.className = "tag orange";
+    arc.style.stroke = "var(--accent)";
+    meta.textContent = `Failed validation (iterations: ${iters}). Fix the issues below and rerun.`;
+
+    // show issues
+    issuesBox.style.display = "block";
+    issuesList.innerHTML = "";
+    if (issues.length){
+      issues.forEach(x=>{
+        const li = document.createElement("li");
+        li.textContent = x;
+        issuesList.appendChild(li);
+      });
+    } else {
+      const li = document.createElement("li");
+      li.textContent = "No issues returned, but passed=false.";
+      issuesList.appendChild(li);
+    }
+  }
+}
+
   </script>
 </body>
 </html>
+
 
 
 
