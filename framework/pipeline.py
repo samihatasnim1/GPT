@@ -15,7 +15,7 @@ def run_pipeline(inputs: dict, backend, max_refine_iters: int = 2):
     # Module 3 (validate + refine loop)
 
     materials = draft
-    report = {"iterations": 0, "passed": False, "issues": [], "fixes_applied": []}
+    report = {"iterations": 0, "passed": False,"checks": {}, "issues": [], "fixes_applied": []}
 
     for i in range(max_refine_iters + 1):
         report["iterations"] = i
@@ -24,6 +24,7 @@ def run_pipeline(inputs: dict, backend, max_refine_iters: int = 2):
             draft_json=json.dumps(materials, indent=2),
         ))
         report["passed"] = bool(val.get("passed", False))
+        report["checks"] = val.get("checks", {})  
         report["issues"] = val.get("issues", [])
         report["fixes_applied"] = val.get("fixes_applied", [])
         materials = val.get("revised_materials", materials)
@@ -32,3 +33,4 @@ def run_pipeline(inputs: dict, backend, max_refine_iters: int = 2):
             break
 
     return blueprint, draft, materials, report
+
