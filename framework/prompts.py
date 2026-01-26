@@ -107,6 +107,14 @@ Validate and refine the generated materials.
 
 Return ONLY JSON with fields:
 - passed (true/false)
+- checks (object with booleans):
+    - objective_coverage
+    - notation_consistency
+    - difficulty_match
+    - examples_step_by_step
+    - domain_control_ok
+    - domain_mechatronics_ok
+    - domain_construction_ok
 - issues (list of strings)
 - fixes_applied (list of strings)
 - revised_materials (same schema as draft materials)
@@ -115,11 +123,17 @@ Validation rules:
 1) Each objective must be covered in notes AND assessed by at least one exercise.
 2) Terminology/notation consistent.
 3) Difficulty matches learner profile.
-4) Explanations are clear (worked examples are step-by-step).
+4) Worked examples are step-by-step.
+5) Control: if control strategy mentioned, include objective + control law/structure.
+6) Mechatronics: include sensor→control→actuator loop at least once.
+7) Construction: include at least one construction scenario/constraint.
 
 Blueprint:
 {blueprint_json}
 
 Draft materials:
 {draft_json}
+
 """
+
+
