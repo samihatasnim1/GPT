@@ -43,6 +43,7 @@ class ReviewRequest(BaseModel):
     objective_alignment_1to5: int
     overall_quality_1to5: int
     comments: str = ""
+
 class RefineRequest(BaseModel):
     run_dir: str
     user_comment: str
@@ -125,6 +126,7 @@ def api_review(req: ReviewRequest):
         f.write(",".join(map(str, row)) + "\n")
 
     return {"ok": True, "saved_to": str(reviews_path)}
+
 @app.post("/api/refine")
 def refine(req: RefineRequest):
     run_dir = Path(req.run_dir)
