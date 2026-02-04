@@ -43,6 +43,11 @@ class ReviewRequest(BaseModel):
     objective_alignment_1to5: int
     overall_quality_1to5: int
     comments: str = ""
+class RefineRequest(BaseModel):
+    run_dir: str
+    user_comment: str
+    mode: str = "openai"
+    max_refine_iters: int = 1
 
 def get_backend(mode: str):
     if mode == "llama":
@@ -146,4 +151,5 @@ def refine(req: RefineRequest):
         "report": report,
         "markdown_path": str(md_path)
     }
+
 
