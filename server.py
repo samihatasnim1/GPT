@@ -1,7 +1,7 @@
 import os
 import json
 from pathlib import Path
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -131,21 +131,36 @@ def api_review(req: ReviewRequest):
 def refine(req: RefineRequest):
     run_dir = Path(req.run_dir)
 
-    blueprint = json.loads((run_dir / "blueprint.json").read_text())
-    current = json.loads((run_dir / "final_materials.json").read_text())
+    blueprint_path = run_dir / "blueprint.json"
+    final_path = run_dir / "final_materials.json"
+    inputs_path = run_dir / "inputs.json"
 
-    backend = get_backend(req.mode)  # your existing backend selection
+    missing = [p.name for p in [blueprint_path, final_path, inputs_path] if not p.exists()]
+    if missing:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Missing files in run_dir={run_dir}: {missing}. Call /api/run first and use the returned run_dir."
+        )
+
+    blueprint = json.loads(blueprint_path.read_text())
+    current = json.loads(final_path.read_text())
+
+    backend = get_backend(req.mode)
 
     updated_materials, report = refine_materials(
         blueprint, current, req.user_comment, backend, max_refine_iters=req.max_refine_iters
     )
 
-    # overwrite outputs for the same run
     save_json(run_dir / "final_materials.json", updated_materials)
     save_json(run_dir / "validation_report.json", report)
 
     md_path = run_dir / "final_materials.md"
-    export_markdown(md_path, json.loads((run_dir/"inputs.json").read_text()), blueprint, updated_materials)
+    export_markdown(
+        md_path,
+        json.loads(inputs_path.read_text()),
+        blueprint,
+        updated_materials
+    )
 
     return {
         "run_dir": str(run_dir),
@@ -153,5 +168,6 @@ def refine(req: RefineRequest):
         "report": report,
         "markdown_path": str(md_path)
     }
+
 
 
