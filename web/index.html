@@ -1180,7 +1180,7 @@ async function refineOnly(){
     renderOutputs(data.final_materials);
     setValidationUI(data.report);
 
-    document.getElementById("mdPathText").textContent = __MD_PATH__ || "—";
+    // document.getElementById("mdPathText").textContent = __MD_PATH__ || "—";
 
     alert("Refinement applied (only requested changes).");
   } catch(e){
@@ -1268,6 +1268,7 @@ function setValidationUI(report){
   </script>
 </body>
 </html>
+
 
 
 
