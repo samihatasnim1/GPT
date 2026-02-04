@@ -11,7 +11,7 @@ from framework.backends import LlamaLocalBackend, OpenAIBackend
 from framework.pipeline import run_pipeline
 from framework.storage import new_run_dir, save_json
 from framework.exporter import export_markdown
-
+from framework.refine import refine_materials
 load_dotenv()
 
 app = FastAPI()
@@ -120,3 +120,30 @@ def api_review(req: ReviewRequest):
         f.write(",".join(map(str, row)) + "\n")
 
     return {"ok": True, "saved_to": str(reviews_path)}
+@app.post("/api/refine")
+def refine(req: RefineRequest):
+    run_dir = Path(req.run_dir)
+
+    blueprint = json.loads((run_dir / "blueprint.json").read_text())
+    current = json.loads((run_dir / "final_materials.json").read_text())
+
+    backend = get_backend(req.mode)  # your existing backend selection
+
+    updated_materials, report = refine_materials(
+        blueprint, current, req.user_comment, backend, max_refine_iters=req.max_refine_iters
+    )
+
+    # overwrite outputs for the same run
+    save_json(run_dir / "final_materials.json", updated_materials)
+    save_json(run_dir / "validation_report.json", report)
+
+    md_path = run_dir / "final_materials.md"
+    export_markdown(md_path, json.loads((run_dir/"inputs.json").read_text()), blueprint, updated_materials)
+
+    return {
+        "run_dir": str(run_dir),
+        "final_materials": updated_materials,
+        "report": report,
+        "markdown_path": str(md_path)
+    }
+
