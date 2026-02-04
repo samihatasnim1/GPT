@@ -101,7 +101,36 @@ Rules:
 Blueprint:
 {blueprint_json}
 """
+MODULE2_REFINE_PROMPT = """
+You are refining existing course materials based on an instructor comment.
 
+Goal: Apply ONLY the requested changes. Do NOT rewrite unaffected content.
+
+Return ONLY JSON with fields:
+- lecture_notes: list of {{title, content}}
+- worked_examples: list of {{title, steps}}
+- exercises: list of {{title, prompt, difficulty}}
+- metadata: {{objective_coverage_note: string}}
+
+Rules (STRICT):
+1) Keep all existing items unchanged unless the comment requires changes.
+2) If the comment says "add N examples", append N new examples ONLY.
+3) If the comment says "remove X", remove ONLY that part.
+4) If the comment says "edit section Y", edit ONLY that section.
+5) Keep titles and numbering consistent. Do not rename existing titles unless asked.
+6) Preserve style + notation.
+
+Blueprint:
+{blueprint_json}
+
+Current materials JSON:
+{current_materials_json}
+
+Instructor comment (apply as patch):
+{user_comment}
+
+Return ONLY JSON. No markdown. No code fences.
+"""
 MODULE3_PROMPT = """
 Validate and refine the generated materials.
 
@@ -135,5 +164,6 @@ Draft materials:
 {draft_json}
 
 """
+
 
 
