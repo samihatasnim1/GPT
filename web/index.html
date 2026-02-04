@@ -1135,13 +1135,68 @@
         alert("Error saving review:\n" + e.message);
       }
     }
+async function refineOnly(){
+  if(!__RUN_DIR__){
+    alert("Run the pipeline first to create a base draft.");
+    return;
+  }
+
+  const comment = (document.getElementById("module2Note").value || "").trim();
+  if(!comment){
+    alert("Write a comment first (e.g., 'add 2 more examples').");
+    return;
+  }
+
+  const mode = (document.getElementById("mode").value || "opneai").trim().toLowerCase();
+  const max_refine_iters = parseInt((document.getElementById("maxRefine").value || "1").trim(), 10) || 0;
+
+  const payload = {
+    run_dir: __RUN_DIR__,
+    user_comment: comment,
+    mode: mode,
+    max_refine_iters: max_refine_iters
+  };
+
+  const regenBtn = document.getElementById("regenBtn");
+  regenBtn.disabled = true;
+  regenBtn.textContent = "Refining...";
+
+  try{
+    const res = await fetch("/api/refine", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
+    });
+
+    if(!res.ok){
+      const txt = await res.text();
+      throw new Error(txt || ("HTTP " + res.status));
+    }
+
+    const data = await res.json();
+    __MD_PATH__ = data.markdown_path || __MD_PATH__;
+
+    renderOutputs(data.final_materials);
+    setValidationUI(data.report);
+
+    document.getElementById("mdPathText").textContent = __MD_PATH__ || "—";
+
+    alert("Refinement applied (only requested changes).");
+  } catch(e){
+    console.error(e);
+    alert("Refine failed:\n" + e.message);
+  } finally {
+    regenBtn.disabled = false;
+    regenBtn.textContent = "Regenerate (apply comment only)";
+  }
+}
 
     // --------------------------
     // Wire buttons
     // --------------------------
     document.getElementById("runBtn").addEventListener("click", runPipeline);
     document.getElementById("generateBtn").addEventListener("click", runPipeline);
-    document.getElementById("regenBtn").addEventListener("click", runPipeline);
+    document.getElementById("regenBtn").addEventListener("click", refineOnly);
     document.getElementById("saveReviewBtn").addEventListener("click", saveExpertReview);
 
     // Initial
@@ -1212,6 +1267,7 @@ function setValidationUI(report){
   </script>
 </body>
 </html>
+
 
 
 
