@@ -98,6 +98,11 @@ Rules:
 - Keep notation consistent
 - Cover all learning objectives
 
+Rules (STRICT):
+- Each lecture note MUST contain:
+  1) At least 4 short paragraphs (3 to 5 sentences each)
+- Paragraphs should explain concepts clearly.
+
 Blueprint:
 {blueprint_json}
 """
@@ -164,6 +169,7 @@ Draft materials:
 {draft_json}
 
 """
+
 
 
 
