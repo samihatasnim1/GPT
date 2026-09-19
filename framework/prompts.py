@@ -103,6 +103,15 @@ Rules (STRICT):
   1) At least 4 short paragraphs (3 to 5 sentences each)
 - Paragraphs should explain concepts clearly.
 
+Equation Rules (IMPORTANT):
+- Use LaTeX notation for ALL mathematical expressions, symbols, and equations.
+- Inline math: wrap with single dollar signs, e.g. $f(x) = ax + b$
+- Display (block) math: wrap with double dollar signs on their own line, e.g. $$\\dot{{x}} = Ax + Bu$$
+- Use display math for important standalone equations (control laws, kinematics, definitions).
+- Use inline math for variables and symbols within sentences.
+- Every worked example step that involves math MUST include the relevant LaTeX equation.
+- Do NOT use plain text for formulas (e.g. never write "x_dot = Ax + Bu", always use LaTeX).
+
 Blueprint:
 {blueprint_json}
 """
@@ -124,6 +133,10 @@ Rules (STRICT):
 4) If the comment says "edit section Y", edit ONLY that section.
 5) Keep titles and numbering consistent. Do not rename existing titles unless asked.
 6) Preserve style + notation.
+
+Equation Rules (IMPORTANT — apply to any new or edited content):
+- Use LaTeX for ALL math: inline with $...$ and display (block) with $$...$$
+- Do NOT use plain text for formulas.
 
 Blueprint:
 {blueprint_json}
@@ -169,7 +182,3 @@ Draft materials:
 {draft_json}
 
 """
-
-
-
-

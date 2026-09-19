@@ -11,6 +11,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AI Course Material Generation Framework</title>
 
+  <!-- MathJax for LaTeX equation rendering -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$']],
+        displayMath: [['$$', '$$']],
+        processEscapes: true,
+        packages: {'[+]': ['ams']}
+      },
+      options: {
+        skipHtmlTags: ['script','noscript','style','textarea','pre']
+      },
+      startup: { typeset: false }   // we call typeset manually after render
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
   <style>
     :root{
       --bg:#eef2f7;
@@ -356,6 +373,54 @@
       .sidebar{ position:relative; height:auto; }
       .progresswrap{ min-width:0; width:100%; }
     }
+
+    /* ── Print / PDF export ────────────────────────────────── */
+    @media print {
+      body > * { display: none !important; }
+      #pdf-print-area { display: block !important; margin: 0; padding: 0; }
+
+      @page { size: A4; margin: 22mm 18mm 22mm 18mm; }
+
+      #pdf-print-area {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 11pt;
+        color: #000;
+        line-height: 1.6;
+      }
+      #pdf-print-area h1 {
+        font-size: 20pt; margin: 0 0 6pt;
+        border-bottom: 2pt solid #1f3e66; padding-bottom: 4pt; color: #1f3e66;
+      }
+      #pdf-print-area .pdf-meta { font-size: 9pt; color: #555; margin-bottom: 18pt; }
+      #pdf-print-area h2 {
+        font-size: 14pt; color: #1f3e66; margin: 18pt 0 6pt;
+        border-bottom: 1pt solid #c8d4e3; padding-bottom: 3pt; page-break-after: avoid;
+      }
+      #pdf-print-area h3 { font-size: 12pt; color: #244a7a; margin: 12pt 0 4pt; page-break-after: avoid; }
+      #pdf-print-area p   { margin: 0 0 7pt; text-align: justify; }
+      #pdf-print-area ul, #pdf-print-area ol { margin: 4pt 0 8pt 18pt; }
+      #pdf-print-area li  { margin-bottom: 3pt; }
+      #pdf-print-area .pdf-section { margin-bottom: 14pt; page-break-inside: avoid; }
+      mjx-container { page-break-inside: avoid; }
+
+      #pdf-print-area .pdf-exercise {
+        border: 1pt solid #c8d4e3; border-radius: 4pt;
+        padding: 7pt 10pt; margin-bottom: 10pt;
+        page-break-inside: avoid; background: #f8fafc;
+      }
+      #pdf-print-area .pdf-exercise .diff { font-size: 8.5pt; color: #555; margin-bottom: 4pt; }
+
+      #pdf-print-area .pdf-step { margin: 3pt 0 3pt 14pt; position: relative; }
+      #pdf-print-area .pdf-step::before { content: "▸ "; color: #14b8a6; position: absolute; left: -12pt; }
+
+      #pdf-print-area .pdf-footer {
+        margin-top: 24pt; border-top: 1pt solid #c8d4e3;
+        padding-top: 6pt; font-size: 8pt; color: #888; text-align: center;
+      }
+    }
+
+    /* hidden container — only shown during print */
+    #pdf-print-area { display: none; }
     .badge2{
   display:inline-block;
   padding:4px 10px;
@@ -430,6 +495,20 @@
        
 div#test {
     display: none;
+}
+
+/* MathJax equation display styling */
+.MJX-TEX { font-size: 1.05em; }
+mjx-container[display="true"] {
+  display: block;
+  margin: 10px auto;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+}
+mjx-container {
+  overflow-x: auto;
+  max-width: 100%;
 }
 
   </style>
@@ -681,8 +760,12 @@ div#test {
                 <div class="contentblock highlight">No exercises yet. Run the pipeline.</div>
               </div>
 
-              <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">
+              <div style="display:flex;gap:10px;justify-content:flex-end;align-items:center;margin-top:12px;flex-wrap:wrap;">
                 <button class="btn secondary" onclick="go('module1')">← Back</button>
+                <button class="btn" id="pdfBtn" disabled onclick="downloadPDF()" style="background:linear-gradient(90deg,#1f3e66,#244a7a);color:#fff;display:flex;align-items:center;gap:6px;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Download as PDF
+                </button>
                 <button class="btn" onclick="go('module3')">Continue → Module 3</button>
               </div>
             </div>
@@ -816,6 +899,9 @@ div#test {
     </main>
   </div>
 
+  <!-- Hidden area populated by buildPrintArea() and shown only during print -->
+  <div id="pdf-print-area"></div>
+
   <script>
     // --------------------------
     // Navigation
@@ -853,6 +939,117 @@ div#test {
     // Helpers
     // --------------------------
     function pretty(obj){ return JSON.stringify(obj ?? {}, null, 2); }
+
+    // Trigger MathJax to re-render equations inside a DOM element (or whole page).
+    function renderMath(el) {
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise(el ? [el] : [document.body]).catch(err => {
+          console.warn("MathJax typeset error:", err);
+        });
+      }
+    }
+
+    // --------------------------
+    // PDF Export
+    // --------------------------
+
+    // Holds the last rendered materials so buildPrintArea can use them
+    let __LAST_MATERIALS__ = null;
+    let __LAST_BLUEPRINT__ = null;
+
+    function buildPrintArea(materials, blueprint) {
+      const area = document.getElementById("pdf-print-area");
+      const topic = document.getElementById("topicScope")?.value || "Course Materials";
+      const profile = document.getElementById("learnerProfile")?.value || "";
+      const now = new Date().toLocaleDateString("en-US", { year:"numeric", month:"long", day:"numeric" });
+
+      // Objectives from blueprint
+      const objectives = blueprint?.learning_objectives || [];
+      const objHTML = objectives.length
+        ? `<ul>${objectives.map(o => `<li>${o}</li>`).join("")}</ul>`
+        : "";
+
+      // Lecture Notes
+      const notes = materials?.lecture_notes || [];
+      const notesHTML = notes.map(sec => `
+        <div class="pdf-section">
+          <h3>${sec.title || "Section"}</h3>
+          <div class="pdf-note-content">${String(sec.content || "").replace(/\n/g, "<br>")}</div>
+        </div>
+      `).join("");
+
+      // Worked Examples
+      const examples = materials?.worked_examples || [];
+      const exHTML = examples.map(ex => {
+        const steps = ex.steps;
+        const stepsHTML = Array.isArray(steps)
+          ? steps.map(s => `<div class="pdf-step">${s}</div>`).join("")
+          : `<div class="pdf-step">${String(steps || "")}</div>`;
+        return `
+          <div class="pdf-section">
+            <h3>${ex.title || "Example"}</h3>
+            ${stepsHTML}
+          </div>
+        `;
+      }).join("");
+
+      // Exercises
+      const exercises = materials?.exercises || [];
+      const hwHTML = exercises.map((ex, i) => `
+        <div class="pdf-exercise">
+          <div style="font-weight:700;margin-bottom:4pt;">Exercise ${i+1}: ${ex.title || ""}</div>
+          <div class="diff">Difficulty: ${ex.difficulty || ""}</div>
+          <div>${String(ex.prompt || "").replace(/\n/g, "<br>")}</div>
+        </div>
+      `).join("");
+
+      area.innerHTML = `
+        <h1>${topic}</h1>
+        <div class="pdf-meta">
+          ${profile ? `<b>Learner profile:</b> ${profile} &nbsp;|&nbsp; ` : ""}
+          <b>Generated:</b> ${now}
+        </div>
+
+        ${objectives.length ? `<h2>Learning Objectives</h2>${objHTML}` : ""}
+
+        ${notes.length ? `<h2>Lecture Notes</h2>${notesHTML}` : ""}
+
+        ${examples.length ? `<h2>Worked Examples</h2>${exHTML}` : ""}
+
+        ${exercises.length ? `<h2>Exercises</h2>${hwHTML}` : ""}
+
+        <div class="pdf-footer">AI Course Material Generation Framework &nbsp;·&nbsp; ${topic} &nbsp;·&nbsp; ${now}</div>
+      `;
+    }
+
+    async function downloadPDF() {
+      if (!__LAST_MATERIALS__) {
+        alert("Run the pipeline first to generate content.");
+        return;
+      }
+
+      const btn = document.getElementById("pdfBtn");
+      btn.disabled = true;
+      btn.textContent = "Preparing PDF…";
+
+      // Build the print-ready HTML
+      buildPrintArea(__LAST_MATERIALS__, __LAST_BLUEPRINT__);
+
+      // Wait for MathJax to typeset the print area before printing
+      try {
+        if (window.MathJax?.typesetPromise) {
+          await window.MathJax.typesetPromise([document.getElementById("pdf-print-area")]);
+        }
+      } catch(e) { console.warn("MathJax PDF typeset:", e); }
+
+      // Small delay to let MathJax finish rendering SVG/CHTML
+      await new Promise(r => setTimeout(r, 400));
+
+      window.print();
+
+      btn.disabled = false;
+      btn.textContent = "⬇ Download as PDF";
+    }
 
     function clampScore(x){
       const n = parseInt(String(x || "").trim(), 10);
@@ -933,6 +1130,9 @@ div#test {
           hwPane.appendChild(div);
         });
       }
+
+      // Re-render all LaTeX equations in the output area after DOM update
+      renderMath(document.getElementById("module2").querySelector(".card:last-child"));
     }
 
     // --------------------------
@@ -1058,6 +1258,9 @@ div#test {
       <div style="margin-top:10px;">${cardsHtml || `<div class="smallmuted">No subtopic details.</div>`}</div>
     </div>
   `;
+
+  // Render any LaTeX that may appear in objectives or subtopic names
+  renderMath(root);
 }
 
         setValidationUI(data.report);
@@ -1073,6 +1276,11 @@ div#test {
 
         // Render materials
         renderOutputs(data.final_materials);
+
+        // Store for PDF export
+        __LAST_MATERIALS__ = data.final_materials;
+        __LAST_BLUEPRINT__ = data.blueprint;
+        document.getElementById("pdfBtn").disabled = false;
 
         setStatuses(true);
         setProgress(80);
@@ -1181,6 +1389,8 @@ async function refineOnly(){
     __MD_PATH__ = data.markdown_path || __MD_PATH__;
 
     renderOutputs(data.final_materials);
+    __LAST_MATERIALS__ = data.final_materials;
+    document.getElementById("pdfBtn").disabled = false;
     setValidationUI(data.report);
 
     // document.getElementById("mdPathText").textContent = __MD_PATH__ || "—";
@@ -1202,6 +1412,7 @@ async function refineOnly(){
     document.getElementById("generateBtn").addEventListener("click", runPipeline);
     document.getElementById("regenBtn").addEventListener("click", refineOnly);
     document.getElementById("saveReviewBtn").addEventListener("click", saveExpertReview);
+    document.getElementById("pdfBtn").addEventListener("click", downloadPDF);
 
     // Initial
     setStatuses(false);
@@ -1271,22 +1482,3 @@ function setValidationUI(report){
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
